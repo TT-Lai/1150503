@@ -1,0 +1,45 @@
+import yfinance as yf
+import mplfinance as mpf
+import pandas as pd
+
+# 1. 下載資料 (設定一個過去的時間段才能看到 K 線)
+# 因為你原本設定 2026 年，那是未來，yfinance 會抓不到資料。
+# 我們改成抓取 2024 年一整年的資料作為示範。
+ticker = "2330.TW"
+df = yf.download(ticker, start="2026-04-01", end="2026-05-01")
+
+# 2. 檢查資料是否為空 (這步很重要)
+if df.empty:
+    print(f"找不到 {ticker} 的資料，請檢查代號或日期設定。")
+else:
+    # yfinance 新版下載下來預設是 MultiIndex (多重索引)
+    # 畫 K 線圖前，必須將其拍平為單層索引
+    df.columns = df.columns.get_level_values(0)
+    
+    # 為了確保日期格式正確，yfinance 返回的 index 已經是 DatetimeIndex
+    # mplfinance 直接支援 pandas DataFrame
+
+    # 3. 繪製 K 線圖
+    # type='candle': 指定畫 K 線圖
+    # style='charles': 一種經典的配色風格 (紅漲綠跌，符合台灣習慣)
+    # title: 圖表標題
+    # ylabel: Y 軸標籤
+    # volume=True: 是否顯示成交量 (選擇性)
+# 修正前：savfig='2330.TW_kline.png'
+# 修正後：savefig='2330.TW_kline.png'
+
+    mpf.plot(df, 
+            type='candle', 
+            style='charles', 
+            title=f'\n2330.TW K-Line Chart',
+            ylabel='Price (TWD)',
+            volume=True, 
+            savefig='kline_output.png') # 這裡要拼成 save + fig
+    mpf.plot(df, 
+         type='candle', 
+         style='charles', 
+         title=f'{ticker} K-Line Chart',
+         ylabel='Price (TWD)',
+         volume=True) # 這樣會直接彈出視窗
+    # 注意：在本地環境執行時，mpf.plot() 預設會彈出一個視窗顯示圖表。
+    print(f"圖表已生成。")
